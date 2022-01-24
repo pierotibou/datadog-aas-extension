@@ -2,12 +2,13 @@ name: Auto tag version bump commit and create release
 
 on:
   push:
-    branches: [master]
+    branches: [ master, main, release/*, hotfix/* ]
     tags-ignore:
       - '**'
 
 jobs:
   tag_version_bump_commit:
+    if: startsWith(github.event.head_commit.message, '[.Net Version Bump]')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
