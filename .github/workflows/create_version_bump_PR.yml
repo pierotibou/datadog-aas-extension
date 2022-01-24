@@ -24,27 +24,25 @@ jobs:
         uses: actions/checkout@v2
 
       - name: "Modify build-packages"
+        id: "versions"
         run: |
           CURRENTVERSION="$(grep -o -e RELEASE_VERSION\=\"[0-9]*\.[0-9]*\.[0-9]*  dotnet/build-packages.sh | sed 's/RELEASE_VERSION="//')"
-          echo $CURRENTVERSION
+          echo Current version is: $CURRENTVERSION
           VERSION=${{ github.event.inputs.version }}
-          TAGNAME=dotnet-$VERSION
-          echo $TAGNAME
+          echo new version is: $VERSION
           sed -i -e "s/$CURRENTVERSION/$VERSION/g" dotnet/build-packages.sh
-          echo replaced version in file
-          git tag $TAGNAME
-          git push origin $TAGNAME
-          echo tag set on master
-
+          echo Replaced release version in file.
+          echo "::set-output name=version::$VERSION"
+          
       - name: Create Pull Request
         id: pr
         uses: peter-evans/create-pull-request@v3.10.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: "version-bump-${{steps.versions.outputs.full_version}}"
+          branch: "version-bump-${{steps.versions.outputs.version}}"
           commit-message: "[Version Bump] ${{steps.versions.outputs.full_version}}"
           delete-branch: true
-          title: "[Version Bump] ${{steps.versions.outputs.full_version}}"
+          title: "[.Net Version Bump] ${{steps.versions.outputs.version}}"
           body: "Dotnet Tracer Bump"
 
       - name: Display output
