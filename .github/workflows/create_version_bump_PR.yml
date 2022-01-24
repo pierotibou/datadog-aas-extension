@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Next Version Number (x.y.zzz). To be used for an extension change.'
+        description: 'Next Version Number (x.y.zzz).'
         required: true
       tracer_version:
         description: 'Next Version Number (x.y.z). To be used for a tracer version bump.'
@@ -37,6 +37,7 @@ jobs:
           
           sed -i -e "s/RELEASE_VERSION=\"$CURRENTVERSION\"/RELEASE_VERSION=\"$VERSION\"/g" dotnet/build-packages.sh
           echo Replaced release version in file.
+          PR_BODY="Bumps the release version to $VERSION."
           
           TRACER_VERSION=${{ github.event.inputs.tracer_version }}
           if [ -n "$TRACER_VERSION" ]; then
@@ -46,9 +47,12 @@ jobs:
             echo Bumping tracer version to $TRACER_VERSION
             sed -i -e "s#dd-trace-dotnet/releases/download/v$CURRENT_TRACER_VERSION#dd-trace-dotnet/releases/download/v$TRACER_VERSION#" dotnet/build-packages.sh
             echo Replaced release version in file.
+            PR_BODY="$PR_BODY Also updates the tracer url to use the last version of the .net Tracer: $TRACER_VERSION"
           fi
           
           echo "::set-output name=version::$VERSION"
+          echo "::set-output name=tracer_version::$TRACER_VERSION"
+          echo "::set-output name=body::$PR_BODY"
           
       - name: Create Pull Request
         id: pr
@@ -59,7 +63,7 @@ jobs:
           commit-message: "[.Net Version Bump] Bump to v${{steps.versions.outputs.version}}"
           delete-branch: true
           title: "[.Net Version Bump] Bump to v${{steps.versions.outputs.version}}"
-          body: "Bumps the release version and the tracer url to use the last version of the .net Tracer: v${{steps.versions.outputs.version}}"
+          body: 
 
       - name: Display output
         run: |
