@@ -37,9 +37,8 @@ jobs:
           tag_name: "${{steps.version.outputs.tagname}}"
           prerelease: false
           body: |
-            |
             ## Versions included
-            [.NET Tracer v${{steps.version.outputs.version}}](https://github.com/DataDog/dd-trace-dotnet/releases/tag/v${{steps.version.outputs.tracer_version}})
+            [.NET Tracer v${{steps.version.outputs.tracer_version}}](https://github.com/DataDog/dd-trace-dotnet/releases/tag/v${{steps.version.outputs.tracer_version}})
             [Datadog Agent v7.32.4](https://github.com/DataDog/datadog-agent/releases/tag/7.32.4)
 
             Hosted on [Nuget](https://www.nuget.org/packages/Datadog.AzureAppServices.DotNet/${{steps.version.outputs.version}})
