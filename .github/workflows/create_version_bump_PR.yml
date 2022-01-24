@@ -4,8 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Next Version Number (x.x.x)'
+        description: 'Next Version Number (x.y.zzz). To be used for an extension change.'
         required: true
+      tracer_version:
+        description: 'Next Version Number (x.y.z). To be used for a tracer version bump.'
+        required: false
       is_prerelease:
         description: 'Is Prerelease version? (true/false)'
         default: 'false'
@@ -28,10 +31,23 @@ jobs:
         run: |
           CURRENTVERSION="$(grep -o -e RELEASE_VERSION\=\"[0-9]*\.[0-9]*\.[0-9]*  dotnet/build-packages.sh | sed 's/RELEASE_VERSION="//')"
           echo Current version is: $CURRENTVERSION
+          
           VERSION=${{ github.event.inputs.version }}
-          echo new version is: $VERSION
-          sed -i -e "s/$CURRENTVERSION/$VERSION/g" dotnet/build-packages.sh
+          echo Bumping extension version to $VERSION
+          
+          sed -i -e "s/RELEASE_VERSION=\"$CURRENTVERSION\"/RELEASE_VERSION=\"$VERSION\"/g" dotnet/build-packages.sh
           echo Replaced release version in file.
+          
+          if [ ${{ github.event.inputs.tracer_version }} != ""]; then
+            CURRENT_TRACER_VERSION="$(grep -o -e dd-trace-dotnet/releases/download/v[0-9]*\.[0-9]*\.[0-9]* dotnet/build-packages.sh | sed 's#dd-trace-dotnet/releases/download/v##')"
+            echo Current tracer version is: $CURRENT_TRACER_VERSION
+            
+            TRACER_VERSION=${{ github.event.inputs.tracer_version }}
+            echo Bumping tracer version to $TRACER_VERSION
+            sed -i -e "s#dd-trace-dotnet/releases/download/v$CURRENT_TRACER_VERSION#dd-trace-dotnet/releases/download/v$TRACER_VERSION#" dotnet/build-packages.sh
+            echo Replaced release version in file.
+          fi
+          
           echo "::set-output name=version::$VERSION"
           
       - name: Create Pull Request
