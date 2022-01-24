@@ -39,7 +39,7 @@ jobs:
           echo Replaced release version in file.
           
           TRACER_VERSION=${{ github.event.inputs.tracer_version }}
-          if [ $TRACER_VERSION != ""]; then
+          if [ -n "$TRACER_VERSION" ]; then
             CURRENT_TRACER_VERSION="$(grep -o -e dd-trace-dotnet/releases/download/v[0-9]*\.[0-9]*\.[0-9]* dotnet/build-packages.sh | sed 's#dd-trace-dotnet/releases/download/v##')"
             echo Current tracer version is: $CURRENT_TRACER_VERSION
             
