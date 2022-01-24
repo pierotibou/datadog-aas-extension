@@ -29,7 +29,7 @@ jobs:
           echo $CURRENTVERSION
           VERSION="${{ github.event.inputs.version }}"
           echo $VERSION
-          sed -i '' -e "s/$CURRENTVERSION/"$VERSION/g" dotnet/build-packages.sh
+          sed -i '' -e "s/$CURRENTVERSION/$VERSION/g" dotnet/build-packages.sh
           echo sed done
           git tag "$TAGNAME"
           echo tag done
