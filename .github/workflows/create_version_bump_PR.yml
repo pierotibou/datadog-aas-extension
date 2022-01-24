@@ -9,10 +9,6 @@ on:
       tracer_version:
         description: 'Next Version Number (x.y.z). To be used for a tracer version bump.'
         required: false
-      is_prerelease:
-        description: 'Is Prerelease version? (true/false)'
-        default: 'false'
-        required: true
 
 jobs:
   bump_version:
