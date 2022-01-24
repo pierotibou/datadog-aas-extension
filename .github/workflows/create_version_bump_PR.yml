@@ -38,11 +38,11 @@ jobs:
           sed -i -e "s/RELEASE_VERSION=\"$CURRENTVERSION\"/RELEASE_VERSION=\"$VERSION\"/g" dotnet/build-packages.sh
           echo Replaced release version in file.
           
-          if [ ${{ github.event.inputs.tracer_version }} != ""]; then
+          TRACER_VERSION=${{ github.event.inputs.tracer_version }}
+          if [ $TRACER_VERSION != ""]; then
             CURRENT_TRACER_VERSION="$(grep -o -e dd-trace-dotnet/releases/download/v[0-9]*\.[0-9]*\.[0-9]* dotnet/build-packages.sh | sed 's#dd-trace-dotnet/releases/download/v##')"
             echo Current tracer version is: $CURRENT_TRACER_VERSION
             
-            TRACER_VERSION=${{ github.event.inputs.tracer_version }}
             echo Bumping tracer version to $TRACER_VERSION
             sed -i -e "s#dd-trace-dotnet/releases/download/v$CURRENT_TRACER_VERSION#dd-trace-dotnet/releases/download/v$TRACER_VERSION#" dotnet/build-packages.sh
             echo Replaced release version in file.
