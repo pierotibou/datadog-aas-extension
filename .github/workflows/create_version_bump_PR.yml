@@ -26,10 +26,15 @@ jobs:
       - name: "Modify build-packages"
         run: |
           CURRENTVERSION="$(grep -o -e RELEASE_VERSION\=\"[0-9]*\.[0-9]*\.[0-9]*  dotnet/build-packages.sh | sed 's/RELEASE_VERSION="//')"
+          echo $CURRENTVERSION
           VERSION="${{ github.event.inputs.version }}"
+          echo $VERSION
           sed -i '' -e "s/$CURRENTVERSION/"$VERSION/g" dotnet/build-packages.sh
+          echo sed done
           git tag "$TAGNAME"
+          echo tag done
           git push origin "$TAGNAME"
+          echo push done
 
       - name: Create Pull Request
         id: pr
