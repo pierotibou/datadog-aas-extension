@@ -40,10 +40,10 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: "version-bump-${{steps.versions.outputs.version}}"
-          commit-message: "[.Net Version Bump] Bump to v${{steps.versions.outputs.full_version}}"
+          commit-message: "[.Net Version Bump] Bump to v${{steps.versions.outputs.version}}"
           delete-branch: true
           title: "[.Net Version Bump] Bump to v${{steps.versions.outputs.version}}"
-          body: "Bumpt the release version and the tracer url to use the last version of the .net Tracer: v${{steps.versions.outputs.version}}"
+          body: "Bumps the release version and the tracer url to use the last version of the .net Tracer: v${{steps.versions.outputs.version}}"
 
       - name: Display output
         run: |
