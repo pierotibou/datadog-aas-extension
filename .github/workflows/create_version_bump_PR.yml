@@ -52,7 +52,7 @@ jobs:
           
           echo "::set-output name=version::$VERSION"
           echo "::set-output name=tracer_version::$TRACER_VERSION"
-          echo "::set-output name=body::$PR_BODY"
+          echo "::set-output name=pr_body::$PR_BODY"
           
       - name: Create Pull Request
         id: pr
@@ -63,7 +63,7 @@ jobs:
           commit-message: "[.Net Version Bump] Bump to v${{steps.versions.outputs.version}}"
           delete-branch: true
           title: "[.Net Version Bump] Bump to v${{steps.versions.outputs.version}}"
-          body: 
+          body: "${{steps.versions.outputs.pr_body}}"
 
       - name: Display output
         run: |
