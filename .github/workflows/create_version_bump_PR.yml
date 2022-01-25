@@ -21,14 +21,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        
+
       - name: "Get last agent release"
         id: last_release
-        uses: InsonusK/get-latest-release@v1.0.1
+        uses: pozetroninc/github-action-get-latest-release@master
         with:
-          myToken: ${{ secrets.GITHUB_TOKEN }}
-          exclude_types: "draft|prerelease"
-          view_top: 1
+          owner: DataDog
+          repo: datadog-agent
+          excludes: prerelease, draft
 
       - name: "Modify build-packages"
         id: "versions"
@@ -77,7 +77,7 @@ jobs:
           fi
           
           CURRENT_AGENT_VERSION="$(grep -o -e agent-binaries-[0-9]*\.[0-9]*\.[0-9]*  dotnet/build-packages.sh | sed 's/agent-binaries-//')"
-          AGENT_VERSION=${{ steps.last_release.outputs.tag_name }}
+          AGENT_VERSION=${{ steps.last_release.outputs.release }}
           echo Current agent version is: $CURRENT_AGENT_VERSION
           echo "Last Agent version: $AGENT_VERSION"
           
