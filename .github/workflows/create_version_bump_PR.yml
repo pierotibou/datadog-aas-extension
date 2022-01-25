@@ -33,12 +33,13 @@ jobs:
       - name: "Modify build-packages"
         id: "versions"
         run: |
-          versionRegex="([0-9]+).([0-9]+).([0-9]+)"
+          versionRegex="[0-9]+.[0-9]+.[0-9]"
+          splitVersionRegex="([0-9]+).([0-9]+).([0-9]+)"
           
-          CURRENTVERSION="$(grep -o -e RELEASE_VERSION\=\"$versionRegex  dotnet/build-packages.sh | sed 's/RELEASE_VERSION="//')"
+          CURRENTVERSION="$(grep -o -e RELEASE_VERSION\=\"$versionRegex dotnet/build-packages.sh | sed 's/RELEASE_VERSION="//')"
           echo Current version is: $CURRENTVERSION
           
-          CURRENT_DEV_VERSION="$(grep -o -e DEVELOPMENT_VERSION\=\"$versionRegex  dotnet/build-packages.sh | sed 's/DEVELOPMENT_VERSION="//')"
+          CURRENT_DEV_VERSION="$(grep -o -e DEVELOPMENT_VERSION\=\"$versionRegex dotnet/build-packages.sh | sed 's/DEVELOPMENT_VERSION="//')"
           echo Current dev version is: $CURRENT_DEV_VERSION
           
           VERSION=${{ github.event.inputs.version }}
@@ -51,7 +52,7 @@ jobs:
           minor=0
           build=0
           
-          if [[ $CURRENT_DEV_VERSION =~ $versionRegex ]]; then
+          if [[ $CURRENT_DEV_VERSION =~ $splitVersionRegex ]]; then
             major="${BASH_REMATCH[1]}"
             minor="${BASH_REMATCH[2]}"
             build="${BASH_REMATCH[3]}"
@@ -87,13 +88,13 @@ jobs:
           agent_major=0
           agent_minor=0
           agent_build=0
-          if [[ $CURRENT_AGENT_VERSION =~ $versionRegex ]]; then
+          if [[ $CURRENT_AGENT_VERSION =~ $splitVersionRegex ]]; then
             major="${BASH_REMATCH[1]}"
             minor="${BASH_REMATCH[2]}"
             build="${BASH_REMATCH[3]}"
           fi
 
-          if [[ $AGENT_VERSION =~ $versionRegex ]]; then
+          if [[ $AGENT_VERSION =~ $splitVersionRegex ]]; then
             agent_major="${BASH_REMATCH[1]}"
             agent_minor="${BASH_REMATCH[2]}"
             agent_build="${BASH_REMATCH[3]}"
