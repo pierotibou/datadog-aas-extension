@@ -33,13 +33,13 @@ jobs:
       - name: "Modify build-packages"
         id: "versions"
         run: |
-          versionRegex="[0-9]+.[0-9]+.[0-9]"
+          REGEX="[0-9]+.[0-9]+.[0-9]"
           splitVersionRegex="([0-9]+).([0-9]+).([0-9]+)"
           
-          CURRENTVERSION="$(grep -o -e RELEASE_VERSION\=\"$versionRegex dotnet/build-packages.sh | sed 's/RELEASE_VERSION="//')"
+          CURRENTVERSION="$(grep -o -e RELEASE_VERSION\=\"$REGEX dotnet/build-packages.sh | sed 's/RELEASE_VERSION="//')"
           echo Current version is: $CURRENTVERSION
           
-          CURRENT_DEV_VERSION="$(grep -o -e DEVELOPMENT_VERSION\=\"$versionRegex dotnet/build-packages.sh | sed 's/DEVELOPMENT_VERSION="//')"
+          CURRENT_DEV_VERSION="$(grep -o -e DEVELOPMENT_VERSION\=\"$REGEX dotnet/build-packages.sh | sed 's/DEVELOPMENT_VERSION="//')"
           echo Current dev version is: $CURRENT_DEV_VERSION
           
           VERSION=${{ github.event.inputs.version }}
