@@ -21,6 +21,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        
+      - name: "Get last agent release"
+        id: last_release
+        uses: InsonusK/get-latest-release@v1.0.1
+        with:
+          myToken: ${{ github.token }}
+          exclude_types: "draft|prerelease"
+          view_top: 1
 
       - name: "Modify build-packages"
         id: "versions"
@@ -66,6 +74,49 @@ jobs:
             sed -i -e "s#dd-trace-dotnet/releases/download/v$CURRENT_TRACER_VERSION#dd-trace-dotnet/releases/download/v$TRACER_VERSION#" dotnet/build-packages.sh
             echo Replaced release version in file.
             PR_BODY="$PR_BODY Also updates the tracer url to use the last version of the .net Tracer: $TRACER_VERSION"
+          fi
+          
+          CURRENT_AGENT_VERSION="$(grep -o -e agent-binaries-[0-9]*\.[0-9]*\.[0-9]*  dotnet/build-packages.sh | sed 's/agent-binaries-//')"
+          AGENT_VERSION=${{ steps.last_release.outputs.tag_name }}
+          echo Current agent version is: $CURRENT_AGENT_VERSION
+          echo "Last Agent version: $AGENT_VERSION"
+          
+          major=0
+          minor=0
+          build=0
+          agent_major=0
+          agent_minor=0
+          agent_build=0
+
+          # break down the version number into it's components
+          regex="([0-9]+).([0-9]+).([0-9]+)"
+          if [[ $CURRENT_AGENT_VERSION =~ $regex ]]; then
+            major="${BASH_REMATCH[1]}"
+            minor="${BASH_REMATCH[2]}"
+            build="${BASH_REMATCH[3]}"
+          fi
+
+          regex="([0-9]+).([0-9]+).([0-9]+)"
+          if [[ $AGENT_VERSION =~ $regex ]]; then
+            agent_major="${BASH_REMATCH[1]}"
+            agent_minor="${BASH_REMATCH[2]}"
+            agent_build="${BASH_REMATCH[3]}"
+          fi
+          
+          if [[ $agent_major > $major ]]; then
+            updateTracer = 1
+          elif [[ $agent_minor > $minor ]]; then
+            updateTracer = 1
+          elif [[ $agent_build > $build ]]; then
+            updateTracer = 1
+          fi
+          
+          if [[ $updateTracer == 1 ]]; then
+            echo Updating agent version
+            
+            sed -i -e "s/agent-binaries-$CURRENT_AGENT_VERSION/agent-binaries-$AGENT_VERSION/" dotnet/build-packages.sh
+            echo Replaced agent version in file.
+            PR_BODY="$PR_BODY Also updates the agent url to use the last version: $AGENT_VERSION"
           fi
           
           echo "::set-output name=version::$VERSION"
