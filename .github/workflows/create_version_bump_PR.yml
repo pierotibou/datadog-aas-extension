@@ -26,7 +26,7 @@ jobs:
         id: last_release
         uses: InsonusK/get-latest-release@v1.0.1
         with:
-          myToken: ${{ github.token }}
+          myToken: ${{ secrets.GITHUB_TOKEN }}
           exclude_types: "draft|prerelease"
           view_top: 1
 
