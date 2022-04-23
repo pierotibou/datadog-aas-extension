@@ -9,6 +9,8 @@ on:
       tracer_version:
         description: 'Next Version Number (x.y.z). To be used for a tracer version bump.'
         required: false
+  repository_dispatch:
+    types: [dd-trace-dotnet-release]
 
 jobs:
   bump_version:
