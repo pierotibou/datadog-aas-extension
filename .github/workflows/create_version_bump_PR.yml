@@ -21,13 +21,20 @@ jobs:
     steps:
 
       - name: "Set Variables"
-      - run: |
-          echo "::set-output name=version::${{ github.event.inputs.version }}"
-          echo "::set-output name=tracer_version::${{ github.event.inputs.tracer_version }}"
-          echo $TRACERVERSION
-          echo "::set-output name=version::$TRACERVERSION"
-          echo "::set-output name=tracer_version::$TRACERVERSION"
-          echo "Error. Input versions are not set"
+        id: "input"
+        run: |
+          if [[ ! -z "${{ github.event.inputs.version }}" ]]; then
+            echo "::set-output name=version::${{ github.event.inputs.version }}"
+            echo "::set-output name=tracer_version::${{ github.event.inputs.tracer_version }}"
+          elif [[ -z "${{ github.event.client_payload.version }}" ]]; then
+            TRACERVERSION=${Version_FromDispatch:1}
+            echo $TRACERVERSION
+            echo "::set-output name=version::${TRACERVERSION}00"
+            echo "::set-output name=tracer_version::$TRACERVERSION"
+          elif
+            echo "Error. Input versions aren't set"
+            exit 1
+          fi
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -52,7 +59,7 @@ jobs:
           CURRENT_DEV_VERSION="$(grep -o -e DEVELOPMENT_VERSION\=\"$versionRegex dotnet/build-packages.sh | sed 's/DEVELOPMENT_VERSION="//')"
           echo Current dev version is: $CURRENT_DEV_VERSION
           
-          VERSION=${{ steps.versions.outputs.version }}
+          VERSION=${{ steps.input.outputs.version }}
           echo Bumping extension version to $VERSION
           
           sed -i -e "s/RELEASE_VERSION=\"$CURRENTVERSION\"/RELEASE_VERSION=\"$VERSION\"/g" dotnet/build-packages.sh
@@ -76,7 +83,7 @@ jobs:
           
           PR_BODY="Bumps the release version to $VERSION."
           
-          TRACER_VERSION=${{steps.versions.outputs.tracer_version}}
+          TRACER_VERSION=${{steps.input.outputs.tracer_version}}
           if [ -n "$TRACER_VERSION" ]; then
             CURRENT_TRACER_VERSION="$(grep -o -e dd-trace-dotnet/releases/download/v$versionRegex dotnet/build-packages.sh | sed 's#dd-trace-dotnet/releases/download/v##')"
             echo Current tracer version is: $CURRENT_TRACER_VERSION
