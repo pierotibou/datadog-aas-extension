@@ -25,7 +25,7 @@ jobs:
           echo "::set-output name=version::${{ github.event.inputs.version }}"
           echo "::set-output name=tracer_version::${{ github.event.inputs.tracer_version }}"
           echo $TRACERVERSION
-          echo "::set-output name=version::$TRACERVERSION00"
+          echo "::set-output name=version::$TRACERVERSION"
           echo "::set-output name=tracer_version::$TRACERVERSION"
           echo "Error. Input versions are not set"
           exit 1
