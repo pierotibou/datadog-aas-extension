@@ -24,16 +24,13 @@ jobs:
         id: "input"
         run: |
           if [[ ! -z "${{ github.event.inputs.version }}" ]]; then
-          
-            TRACERVERSION=${{ github.event.inputs.version }}
-            echo $TRACERVERSION
-            echo ${TRACERVERSION:1}
-            
             echo "::set-output name=version::${{ github.event.inputs.version }}"
             echo "::set-output name=tracer_version::${{ github.event.inputs.tracer_version }}"
           elif [[ -z "${{ github.event.client_payload.version }}" ]]; then
             TRACERVERSION=${{ github.event.client_payload.version }}
-            echo $TRACERVERSION
+            echo "Version reveived from dd-trace-dotnet: $TRACERVERSION"
+            TRACERVERSION=${TRACERVERSION:1}
+            echo "Version reveived once normalized: $TRACERVERSION"
             echo "::set-output name=version::${TRACERVERSION}00"
             echo "::set-output name=tracer_version::$TRACERVERSION"
           else
