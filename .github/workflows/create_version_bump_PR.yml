@@ -27,6 +27,8 @@ jobs:
           
             TRACERVERSION=${{ github.event.client_payload.version:1 }}
             echo $TRACERVERSION
+            echo ${TRACERVERSION:1}
+            
             echo "::set-output name=version::${{ github.event.inputs.version }}"
             echo "::set-output name=tracer_version::${{ github.event.inputs.tracer_version }}"
           elif [[ -z "${{ github.event.client_payload.version }}" ]]; then
