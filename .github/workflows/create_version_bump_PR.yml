@@ -24,6 +24,9 @@ jobs:
         id: "input"
         run: |
           if [[ ! -z "${{ github.event.inputs.version }}" ]]; then
+          
+            TRACERVERSION=${{ github.event.client_payload.version:1 }}
+            echo $TRACERVERSION
             echo "::set-output name=version::${{ github.event.inputs.version }}"
             echo "::set-output name=tracer_version::${{ github.event.inputs.tracer_version }}"
           elif [[ -z "${{ github.event.client_payload.version }}" ]]; then
