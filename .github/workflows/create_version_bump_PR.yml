@@ -19,7 +19,7 @@ jobs:
       GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
     steps:
-      - name: Set Variables
+      - name: "Set Variables"
       - run: |
           if [[ ! -z "${{ github.event.inputs.version }}" ]]; then
             echo "::set-output name=version::${{ github.event.inputs.version }}"
