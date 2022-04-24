@@ -29,7 +29,7 @@ jobs:
           elif [[ -z "${{ github.event.client_payload.version }}" ]]; then
             TRACERVERSION=${{ github.event.client_payload.version }}
             echo $TRACERVERSION
-            echo "::set-output name=version::${TRACERVERSION}00"
+            echo "::set-output name=version::$TRACERVERSION"
             echo "::set-output name=tracer_version::$TRACERVERSION"
           elif
             echo "Error. Input versions aren't set"
