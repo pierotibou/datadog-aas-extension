@@ -28,7 +28,6 @@ jobs:
           echo "::set-output name=version::$TRACERVERSION"
           echo "::set-output name=tracer_version::$TRACERVERSION"
           echo "Error. Input versions are not set"
-          exit 1
 
       - name: Checkout
         uses: actions/checkout@v2
