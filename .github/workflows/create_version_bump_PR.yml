@@ -25,7 +25,7 @@ jobs:
         run: |
           if [[ ! -z "${{ github.event.inputs.version }}" ]]; then
           
-            TRACERVERSION=${{ github.event.client_payload.version:1 }}
+            TRACERVERSION=${{ github.event.client_payload.version }}
             echo $TRACERVERSION
             echo ${TRACERVERSION:1}
             
