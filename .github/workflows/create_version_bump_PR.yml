@@ -33,7 +33,6 @@ jobs:
             echo "::set-output name=tracer_version::$TRACERVERSION"
           elif
             echo "Error. Input versions aren't set"
-            exit 1
           fi
 
       - name: Checkout
