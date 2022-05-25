@@ -100,7 +100,7 @@ jobs:
             PR_BODY="$PR_BODY, updates the tracer version to: $TRACER_VERSION "
           fi
 
-          if [ "${{ github.event.inputs.update_agent }}" ]; then
+          if [ "${{ github.event.inputs.update_agent }}" == "true" ]; then
             CURRENT_AGENT_VERSION="$(grep -o -e agent-binaries-$versionRegex  dotnet/build-packages.sh | sed 's/agent-binaries-//')"
             AGENT_VERSION=${{ steps.last_release.outputs.release }}
             echo Current agent version is: $CURRENT_AGENT_VERSION
