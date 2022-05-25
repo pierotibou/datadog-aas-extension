@@ -9,6 +9,11 @@ on:
       tracer_version:
         description: 'Next Version Number (x.y.z). To be used for a tracer version bump.'
         required: false
+      update_agent:
+        description: 'Update the agent as well'
+        type: boolean
+        required: false
+        default: false
   repository_dispatch:
     types: [dd-trace-dotnet-release]
 
@@ -21,20 +26,20 @@ jobs:
     steps:
 
       - name: "Set Variables"
-        id: "input"
+        id: "set_variables"
         run: |
           if [[ ! -z "${{ github.event.inputs.version }}" ]]; then
             echo "::set-output name=version::${{ github.event.inputs.version }}"
             echo "::set-output name=tracer_version::${{ github.event.inputs.tracer_version }}"
           elif [[ ! -z "${{ github.event.client_payload.version }}" ]]; then
             TRACERVERSION=${{ github.event.client_payload.version }}
-            echo "Version reveived from dd-trace-dotnet: $TRACERVERSION"
+            echo "Version received from dd-trace-dotnet: $TRACERVERSION"
             TRACERVERSION=${TRACERVERSION:1}
-            echo "Version reveived once normalized: $TRACERVERSION"
+            echo "Version received once normalized: $TRACERVERSION"
             echo "::set-output name=version::${TRACERVERSION}00"
             echo "::set-output name=tracer_version::$TRACERVERSION"
           else
-            echo "Error. Input versions aren't set"
+            echo "Error. Versions weren't provided in input."
             exit 1
           fi
       - name: Checkout
@@ -60,7 +65,7 @@ jobs:
           CURRENT_DEV_VERSION="$(grep -o -e DEVELOPMENT_VERSION\=\"$versionRegex dotnet/build-packages.sh | sed 's/DEVELOPMENT_VERSION="//')"
           echo Current dev version is: $CURRENT_DEV_VERSION
 
-          VERSION=${{ steps.input.outputs.version }}
+          VERSION=${{ steps.set_variables.outputs.version }}
           echo Bumping extension version to $VERSION
 
           sed -i -e "s/RELEASE_VERSION=\"$CURRENTVERSION\"/RELEASE_VERSION=\"$VERSION\"/g" dotnet/build-packages.sh
@@ -84,7 +89,7 @@ jobs:
 
           PR_BODY="Bumps the release version to $VERSION"
 
-          TRACER_VERSION=${{steps.input.outputs.tracer_version}}
+          TRACER_VERSION=${{steps.set_variables.outputs.tracer_version}}
           if [ -n "$TRACER_VERSION" ]; then
             CURRENT_TRACER_VERSION="$(grep -o -e dd-trace-dotnet/releases/download/v$versionRegex dotnet/build-packages.sh | sed 's#dd-trace-dotnet/releases/download/v##')"
             echo Current tracer version is: $CURRENT_TRACER_VERSION
@@ -92,44 +97,46 @@ jobs:
             echo Bumping tracer version to $TRACER_VERSION
             sed -i -e "s#dd-trace-dotnet/releases/download/v$CURRENT_TRACER_VERSION#dd-trace-dotnet/releases/download/v$TRACER_VERSION#" dotnet/build-packages.sh
             echo Replaced release version in file.
-            PR_BODY="$PR_BODY, updates the tracer url to: $TRACER_VERSION "
+            PR_BODY="$PR_BODY, updates the tracer version to: $TRACER_VERSION "
           fi
 
-          CURRENT_AGENT_VERSION="$(grep -o -e agent-binaries-$versionRegex  dotnet/build-packages.sh | sed 's/agent-binaries-//')"
-          AGENT_VERSION=${{ steps.last_release.outputs.release }}
-          echo Current agent version is: $CURRENT_AGENT_VERSION
-          echo "Latest Agent version: $AGENT_VERSION"
+          if [ "${{ github.event.inputs.update_agent }}" ]; then
+            CURRENT_AGENT_VERSION="$(grep -o -e agent-binaries-$versionRegex  dotnet/build-packages.sh | sed 's/agent-binaries-//')"
+            AGENT_VERSION=${{ steps.last_release.outputs.release }}
+            echo Current agent version is: $CURRENT_AGENT_VERSION
+            echo "Latest Agent version: $AGENT_VERSION"
 
-          major=0
-          minor=0
-          build=0
-          agent_major=0
-          agent_minor=0
-          agent_build=0
-          if [[ $CURRENT_AGENT_VERSION =~ $splitVersionRegex ]]; then
-            major="${BASH_REMATCH[1]}"
-            minor="${BASH_REMATCH[2]}"
-            build="${BASH_REMATCH[3]}"
-          fi
-          if [[ $AGENT_VERSION =~ $splitVersionRegex ]]; then
-            agent_major="${BASH_REMATCH[1]}"
-            agent_minor="${BASH_REMATCH[2]}"
-            agent_build="${BASH_REMATCH[3]}"
-          fi
+            major=0
+            minor=0
+            build=0
+            agent_major=0
+            agent_minor=0
+            agent_build=0
+            if [[ $CURRENT_AGENT_VERSION =~ $splitVersionRegex ]]; then
+              major="${BASH_REMATCH[1]}"
+              minor="${BASH_REMATCH[2]}"
+              build="${BASH_REMATCH[3]}"
+            fi
+            if [[ $AGENT_VERSION =~ $splitVersionRegex ]]; then
+              agent_major="${BASH_REMATCH[1]}"
+              agent_minor="${BASH_REMATCH[2]}"
+              agent_build="${BASH_REMATCH[3]}"
+            fi
 
-          if [[ $agent_major > $major ]]; then
-            updateAgent=1
-          elif [[ $agent_minor > $minor ]]; then
-            updateAgent=1
-          elif [[ $agent_build > $build ]]; then
-            updateAgent=1
-          fi
+            if [[ $agent_major > $major ]]; then
+              newAgentAvailable=1
+            elif [[ $agent_minor > $minor ]]; then
+              newAgentAvailable=1
+            elif [[ $agent_build > $build ]]; then
+              newAgentAvailable=1
+            fi
 
-          if [[ "$updateAgent" == "1" ]]; then
-            echo Updating agent version
-            sed -i -e "s/agent-binaries-$CURRENT_AGENT_VERSION/agent-binaries-$AGENT_VERSION/" dotnet/build-packages.sh
-            echo Replaced agent version in file.
-            PR_BODY="$PR_BODY, and updates the agent URL to: $AGENT_VERSION"
+            if [[ "$newAgentAvailable" == "1" ]]; then
+              echo Updating agent version
+              sed -i -e "s/agent-binaries-$CURRENT_AGENT_VERSION/agent-binaries-$AGENT_VERSION/" dotnet/build-packages.sh
+              echo Replaced agent version in file.
+              PR_BODY="$PR_BODY, and updates the agent version to: $AGENT_VERSION"
+            fi
           fi
 
           PR_BODY="$PR_BODY."
